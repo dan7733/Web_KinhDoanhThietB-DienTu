@@ -1,0 +1,196 @@
+import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import styles from '../css/payment/payment.module.css';
+import demoproduct from '../../img/category/Laptop.jpg';
+import axios from 'axios';
+
+const Payment = () => {
+  const location = useLocation();
+  const { product } = location.state || {};
+
+  // State for voucher
+  const [voucherCode, setVoucherCode] = useState('');
+  const [discountPercent, setDiscountPercent] = useState(0);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  // Hàm xác định giá hiển thị
+  const getDisplayPrice = () => {
+    if (product) {
+      // Nếu có discount_price > 0 thì hiển thị discount_price, ngược lại hiển thị price
+      const basePrice = product.discount_price > 0 ? product.discount_price : product.price;
+      // Áp dụng giảm giá phần trăm từ voucher
+      return basePrice * (1 - discountPercent / 100);
+    }
+    return 0; // Giá mặc định khi không có sản phẩm
+  };
+
+  // Hàm kiểm tra có hiển thị giá gốc hay không
+  const shouldShowOriginalPrice = () => {
+    return product && product.discount_price > 0;
+  };
+
+  // Hàm xử lý áp dụng voucher
+  const applyVoucher = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/api/v1/applyvoucher/', {
+        voucherCode,
+      });
+      const { errCode, message, value } = response.data;
+
+      if (errCode === 0) {
+        setDiscountPercent(value); // Cập nhật phần trăm giảm giá
+        setErrorMessage(''); // Xóa thông báo lỗi
+      } else {
+        setDiscountPercent(0); // Reset giảm giá
+        setErrorMessage(message); // Hiển thị lỗi
+      }
+    } catch (error) {
+      setDiscountPercent(0);
+      setErrorMessage('Đã có lỗi xảy ra khi áp dụng voucher.');
+    }
+  };
+
+  const displayPrice = getDisplayPrice();
+  const showOriginalPrice = shouldShowOriginalPrice();
+  const productCount = product ? 1 : 0;
+
+  return (
+    <div className={`container mt-5 ${styles.detailproductContain}`}>
+      <div className="row g-4">
+        <h3 className={styles.title}>Thông tin thanh toán</h3>
+
+        {/* Form thông tin khách hàng */}
+        <div className={`col-lg-6 col-md-6 col-12 ${styles.detailproductForm}`}>
+          <form>
+            <div className="mb-3">
+              <label htmlFor="fullname" className={styles.formLabelName}>Họ tên *</label>
+              <input type="text" className="form-control" id="fullname" required />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Địa chỉ *</label>
+              <input type="text" className="form-control" required />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Số điện thoại *</label>
+              <input type="tel" className="form-control" required />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Địa chỉ email *</label>
+              <input type="email" className="form-control" required />
+            </div>
+
+            <div className="mb-3">
+              <label className="form-label">Ghi chú đơn hàng</label>
+              <textarea className="form-control" rows="3"></textarea>
+            </div>
+          </form>
+        </div>
+
+        {/* Chi tiết đơn hàng */}
+        <div className={`col-lg-6 col-md-6 col-12 ${styles.detailproductSummary}`}>
+          <div className={`border rounded p-3 bg-light`}>
+            <div className={styles.titleProduct}>
+              <h5>Đơn hàng ({productCount} sản phẩm)</h5>
+            </div>
+
+            <div className={styles.detailproductContainBox}>
+              {product ? (
+                <div className={styles.detailproductProductItem}>
+                  <img
+                    src={
+                      product.product_img
+                        ? `http://localhost:3000/images/products/${product.product_img}`
+                        : demoproduct
+                    }
+                    alt={product.name}
+                  />
+                  <div className={styles.detailproductProductDetails}>
+                    <div>{product.name}</div>
+                    <div className={styles.detailproductSalePrice}>
+                      {displayPrice.toLocaleString()}₫
+                    </div>
+                    {showOriginalPrice && (
+                      <div className={styles.detailproductOldPrice}>
+                        {product.price.toLocaleString()}₫
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div>Không có sản phẩm nào trong đơn hàng.</div>
+              )}
+            </div>
+
+            {/* Mã giảm giá */}
+            <div className={`input-group mb-3 ${styles.detailproductInput}`}>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="Nhập mã giảm giá"
+                value={voucherCode}
+                onChange={(e) => setVoucherCode(e.target.value)}
+              />
+              <button
+                className={`${styles.btnBtn} btn-secondary`}
+                onClick={applyVoucher}
+              >
+                Áp dụng
+              </button>
+            </div>
+
+            {/* Hiển thị thông báo lỗi nếu có */}
+            {errorMessage && (
+              <div className="alert alert-danger" role="alert">
+                {errorMessage}
+              </div>
+            )}
+
+            {/* Tổng giá */}
+            <div className={styles.detailproductPrice}>
+              <p>Tạm tính: <strong>{displayPrice.toLocaleString()}₫</strong></p>
+              <p>Phí vận chuyển: <strong>0₫</strong></p>
+              <p>Tổng: <strong>{displayPrice.toLocaleString()}₫</strong></p>
+            </div>
+
+            {/* Phương thức thanh toán */}
+            <div className="mb-3">
+              <label className="form-label">Phương thức thanh toán</label>
+              <br />
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="payment"
+                  id="cod"
+                  checked
+                />
+                <label className="form-check-label" htmlFor="cod">
+                  Trả tiền mặt khi nhận hàng
+                </label>
+              </div>
+              <div className="form-check">
+                <input
+                  className="form-check-input"
+                  type="radio"
+                  name="payment"
+                  id="bank"
+                />
+                <label className="form-check-label" htmlFor="bank">
+                  Chuyển khoản
+                </label>
+              </div>
+            </div>
+
+            {/* Nút đặt hàng */}
+            <button className={`${styles.btnBtn} btn w-100`}>ĐẶT HÀNG</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Payment;
