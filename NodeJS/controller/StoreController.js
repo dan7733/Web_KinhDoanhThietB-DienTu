@@ -1,5 +1,5 @@
 import express from "express";
-import storeModel from '../models/storeModel'  // Import model để xử lý với CSDL hoặc logic nghiệp vụ
+import storeModel from '../models/storeModel.js'  // Import model để xử lý với CSDL hoặc logic nghiệp vụ
 // import { body, validationResult } from 'express-validator';
 
 

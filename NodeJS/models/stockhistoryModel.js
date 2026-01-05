@@ -1,7 +1,7 @@
 // models/stockHistoryModel.js
-import { sequelize, DataTypes } from '../configs/connectDatabase';
-import { Product } from './productModel';
-import { Stock } from './stockModel';
+import { sequelize, DataTypes } from '../configs/connectDatabase.js';
+import { Product } from './productModel.js';
+import { Stock } from './stockModel.js';
 import { Op } from 'sequelize';
 
 const StockHistory = sequelize.define('StockHistory', {

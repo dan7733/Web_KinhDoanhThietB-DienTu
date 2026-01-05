@@ -1,5 +1,5 @@
 import express from "express";
-import categoryModel from '../models/categoryModel'  // Import model để xử lý với CSDL hoặc logic nghiệp vụ
+import categoryModel from '../models/categoryModel.js'  // Import model để xử lý với CSDL hoặc logic nghiệp vụ
 // import { body, validationResult } from 'express-validator';
 
 

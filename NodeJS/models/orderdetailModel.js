@@ -1,8 +1,8 @@
 import express from 'express'
-import { sequelize, DataTypes } from '../configs/connectDatabase';
+import { sequelize, DataTypes } from '../configs/connectDatabase.js';
 import { Op } from 'sequelize';
-import { Order } from './orderModel'; 
-import { Product } from './productModel'; // Import model Product để thiết lập quan hệ
+import { Order } from './orderModel.js'; 
+import { Product } from './productModel.js'; // Import model Product để thiết lập quan hệ
 
 // Định nghĩa mô hình OrderDetail
 const OrderDetail = sequelize.define('OrderDetail', {

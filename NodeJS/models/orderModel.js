@@ -1,6 +1,6 @@
-import { sequelize, DataTypes } from '../configs/connectDatabase';
+import { sequelize, DataTypes } from '../configs/connectDatabase.js';
 import { Op } from 'sequelize';
-import { User } from './userModel';
+import { User } from './userModel.js';
 
 const Order = sequelize.define('Order', {
     order_id: {

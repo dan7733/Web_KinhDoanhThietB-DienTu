@@ -1,7 +1,7 @@
 import express from "express";
 import fs from 'fs';
 import path from 'path';
-import userModel from '../models/userModel';
+import userModel from '../models/userModel.js';
 
 // Hàm xóa ảnh nếu cần
 const deleteUserImage = (filename) => {

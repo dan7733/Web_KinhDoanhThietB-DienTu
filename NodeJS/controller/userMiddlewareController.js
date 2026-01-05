@@ -1,6 +1,6 @@
 // user Middleware and login/logout and register
 import express from "express";
-import userModel from '../models/userModel';  // Import model để xử lý với CSDL hoặc logic nghiệp vụ
+import userModel from '../models/userModel.js';  // Import model để xử lý với CSDL hoặc logic nghiệp vụ
 import dotenv from 'dotenv/config';
 import bcrypt from 'bcryptjs';
 import jwt  from 'jsonwebtoken';

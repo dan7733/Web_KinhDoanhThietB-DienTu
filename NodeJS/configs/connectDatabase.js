@@ -1,9 +1,15 @@
-import { Sequelize, DataTypes } from 'sequelize'; // Nhập cả Sequelize và DataTypes
+import { Sequelize, DataTypes } from 'sequelize'
 import mysql from 'mysql2'
-// Kết nối Sequelize
-const sequelize = new Sequelize('doan4', 'root', '', {
-    host: 'localhost',
-    dialect: 'mysql', // Hoặc 'postgres', 'sqlite' nếu sử dụng loại cơ sở dữ liệu khác
-});
 
-export { sequelize, DataTypes };  // Xuất cả sequelize và DataTypes
+const sequelize = new Sequelize(
+  'doan4',
+  'root',
+  'root',
+  {
+    host: 'mysql', // ⚠️ giống mongo → host = service name
+    dialect: 'mysql',
+    logging: false,
+  }
+)
+
+export { sequelize, DataTypes }

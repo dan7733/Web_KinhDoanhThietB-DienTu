@@ -1,4 +1,4 @@
-import { sequelize, DataTypes } from '../configs/connectDatabase';
+import { sequelize, DataTypes } from '../configs/connectDatabase.js';
 
 const PendingUsers = sequelize.define('PendingUsers', {
     id: {

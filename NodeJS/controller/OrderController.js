@@ -1,11 +1,11 @@
 // controller/OrderController.js
 import express from "express";
-import orderdetailModel from '../models/orderdetailModel';
-import orderModel from '../models/orderModel';
-import userModel from '../models/userModel';
-import { sendOrderConfirmationEmail, sendZaloPayConfirmationEmail } from '../configs/email';
-import stockModel from '../models/stockModel';
-import { StockHistory } from '../models/stockhistoryModel'; // Thêm import StockHistory
+import orderdetailModel from '../models/orderdetailModel.js';
+import orderModel from '../models/orderModel.js';
+import userModel from '../models/userModel.js';
+import { sendOrderConfirmationEmail, sendZaloPayConfirmationEmail } from '../configs/email.js';
+import stockModel from '../models/stockModel.js';
+import { StockHistory } from '../models/stockhistoryModel.js'; // Thêm import StockHistory
 import axios from 'axios';
 import CryptoJS from 'crypto-js';
 import moment from 'moment';

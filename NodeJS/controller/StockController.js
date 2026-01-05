@@ -1,8 +1,8 @@
 import express from "express";
-import stockModel from "../models/stockModel";
-import { StockHistory } from "../models/stockhistoryModel";
-import stockHistoryModel from "../models/stockhistoryModel";
-import { Product } from "../models/productModel";
+import stockModel from "../models/stockModel.js";
+import { StockHistory } from "../models/stockhistoryModel.js";
+import stockHistoryModel from "../models/stockhistoryModel.js";
+import { Product } from "../models/productModel.js";
 import PDFDocument from "pdfkit";
 import fs from "fs";
 import path from "path";

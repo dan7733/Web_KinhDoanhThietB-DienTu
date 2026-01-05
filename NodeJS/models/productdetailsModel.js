@@ -1,6 +1,6 @@
-import { sequelize, DataTypes } from '../configs/connectDatabase';
+import { sequelize, DataTypes } from '../configs/connectDatabase.js';
 import { Op } from 'sequelize';
-import { Product } from './productModel';
+import { Product } from './productModel.js';
 
 const ProductDetails = sequelize.define('ProductDetails', {
     detail_id: {

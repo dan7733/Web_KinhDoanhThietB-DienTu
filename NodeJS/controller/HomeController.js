@@ -1,18 +1,18 @@
 import express from "express";
-import { Product } from "../Models/productModel.js";
-import { User } from "../Models/userModel.js";
-import { Order } from "../Models/orderModel.js";
-import { OrderDetail } from "../Models/orderdetailModel.js";
+import { Product } from "../models/productModel.js";
+import { User } from "../models/userModel.js";
+import { Order } from "../models/orderModel.js";
+import { OrderDetail } from "../models/orderdetailModel.js";
 import { Op, fn, col } from "sequelize";
 
 const getHomePage = async (req, res) => {
     try {
         // Kiểm tra session người dùng
         if (!req.session || !req.session.user) {
-            return res.redirect('/'); // Chuyển hướng nếu chưa đăng nhập
+            return res.redirect('/');
         }
 
-        // Lấy user_id từ session và truy vấn thông tin người dùng từ database
+        // Lấy user_id từ session
         const userId = req.session.user.user_id;
         const user = await User.findOne({
             where: { user_id: userId },
@@ -20,12 +20,11 @@ const getHomePage = async (req, res) => {
         });
 
         if (!user) {
-            // Nếu không tìm thấy user, hủy session và chuyển hướng về login
             req.session.destroy();
             return res.redirect('/login');
         }
 
-        // Lấy tham số lọc từ query
+        // Lấy tham số lọc
         const { filterType, startDate, endDate, quarter, year } = req.query;
 
         // Xác định khoảng thời gian
@@ -35,50 +34,21 @@ const getHomePage = async (req, res) => {
         let selectedQuarter = quarter ? parseInt(quarter) : null;
 
         if (filterType === 'custom' && startDate && endDate) {
-            dateRange = {
-                startDate: new Date(startDate),
-                endDate: new Date(endDate)
-            };
-            timeCondition = {
-                created_at: {
-                    [Op.between]: [dateRange.startDate, dateRange.endDate]
-                }
-            };
+            dateRange = { startDate: new Date(startDate), endDate: new Date(endDate) };
+            timeCondition = { created_at: { [Op.between]: [dateRange.startDate, dateRange.endDate] } };
         } else if (filterType === 'quarter' && quarter && year) {
             const startMonth = (quarter - 1) * 3;
-            dateRange = {
-                startDate: new Date(year, startMonth, 1),
-                endDate: new Date(year, startMonth + 3, 0)
-            };
-            timeCondition = {
-                created_at: {
-                    [Op.between]: [dateRange.startDate, dateRange.endDate]
-                }
-            };
+            dateRange = { startDate: new Date(year, startMonth, 1), endDate: new Date(year, startMonth + 3, 0) };
+            timeCondition = { created_at: { [Op.between]: [dateRange.startDate, dateRange.endDate] } };
         } else if (filterType === 'year' && year) {
-            dateRange = {
-                startDate: new Date(year, 0, 1),
-                endDate: new Date(year, 11, 31)
-            };
-            timeCondition = {
-                created_at: {
-                    [Op.between]: [dateRange.startDate, dateRange.endDate]
-                }
-            };
+            dateRange = { startDate: new Date(year, 0, 1), endDate: new Date(year, 11, 31) };
+            timeCondition = { created_at: { [Op.between]: [dateRange.startDate, dateRange.endDate] } };
         } else {
-            // Mặc định: Tuần hiện tại (từ thứ Hai đến Chủ Nhật)
             const today = new Date();
             const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay() + 1));
             const endOfWeek = new Date(today.setDate(startOfWeek.getDate() + 6));
-            dateRange = {
-                startDate: startOfWeek,
-                endDate: endOfWeek
-            };
-            timeCondition = {
-                created_at: {
-                    [Op.between]: [dateRange.startDate, dateRange.endDate]
-                }
-            };
+            dateRange = { startDate: startOfWeek, endDate: endOfWeek };
+            timeCondition = { created_at: { [Op.between]: [dateRange.startDate, dateRange.endDate] } };
         }
 
         // 1. Tính tổng doanh thu
@@ -93,10 +63,11 @@ const getHomePage = async (req, res) => {
         // 2. Đếm tổng số sản phẩm
         const totalProducts = await Product.count();
 
-        // 3. Đếm số sản phẩm đã bán
+        // 3. Đếm số sản phẩm đã bán (SỬA LỖI GROUP BY Ở ĐÂY)
         const productsSold = await OrderDetail.sum('quantity', {
             include: [{
                 model: Order,
+                attributes: [], // <--- QUAN TRỌNG: Thêm dòng này
                 where: {
                     status_payment: 'paid',
                     status: { [Op.not]: 'cancelled' },
@@ -106,34 +77,25 @@ const getHomePage = async (req, res) => {
         }) || 0;
 
         // 4. Đếm tổng số đơn hàng
-        const totalOrders = await Order.count({
-            where: timeCondition
-        });
+        const totalOrders = await Order.count({ where: timeCondition });
 
         // 5. Đếm số đơn hàng đang giao
         const ordersShipping = await Order.count({
-            where: {
-                status: 'shipped',
-                ...timeCondition
-            }
+            where: { status: 'shipped', ...timeCondition }
         });
 
         // 6. Đếm tổng số khách hàng
-        const totalCustomers = await User.count({
-            where: { role: 0 }
-        });
+        const totalCustomers = await User.count({ where: { role: 0 } });
 
         // 7. Đếm số khách hàng mới
         const newCustomers = await User.count({
             where: {
                 role: 0,
-                createdAt: {
-                    [Op.between]: [dateRange.startDate, dateRange.endDate]
-                }
+                createdAt: { [Op.between]: [dateRange.startDate, dateRange.endDate] }
             }
         });
 
-        // 8. Dữ liệu cho biểu đồ doanh thu
+        // 8. Dữ liệu cho biểu đồ
         let labels = [];
         let revenueData = [];
         let weekLabels = [];
@@ -155,36 +117,35 @@ const getHomePage = async (req, res) => {
                 raw: true
             });
 
+            // SỬA LỖI CASE SENSITIVE VÀ GROUP BY
             const monthlySales = await OrderDetail.findAll({
                 attributes: [
-                    [fn('MONTH', col('order.created_at')), 'month'],
+                    [fn('MONTH', col('Order.created_at')), 'month'], // <--- Sửa 'order' thành 'Order'
                     [fn('SUM', col('quantity')), 'quantity']
                 ],
                 include: [{
                     model: Order,
+                    attributes: [], // <--- Thêm attributes rỗng
                     where: {
                         status_payment: 'paid',
                         status: { [Op.not]: 'cancelled' },
                         ...timeCondition
                     }
                 }],
-                group: [fn('MONTH', col('order.created_at'))],
-                order: [[fn('MONTH', col('order.created_at')), 'ASC']],
+                group: [fn('MONTH', col('Order.created_at'))], // <--- Sửa 'order' thành 'Order'
+                order: [[fn('MONTH', col('Order.created_at')), 'ASC']],
                 raw: true
             });
 
+            // Xử lý dữ liệu hiển thị (giữ nguyên)
             labels = Array(12).fill(0).map((_, i) => `Th${i + 1}`);
             revenueData = Array(12).fill(0);
-            weekLabels = Array(12).fill(0).map((_, i) => `Th${i + 1}`);
             salesData = Array(12).fill(0);
+            weekLabels = labels;
 
-            monthlyRevenue.forEach(item => {
-                revenueData[item.month - 1] = parseFloat(item.revenue);
-            });
+            monthlyRevenue.forEach(item => revenueData[item.month - 1] = parseFloat(item.revenue));
+            monthlySales.forEach(item => salesData[item.month - 1] = parseInt(item.quantity));
 
-            monthlySales.forEach(item => {
-                salesData[item.month - 1] = parseInt(item.quantity);
-            });
         } else if (filterType === 'quarter') {
             const monthlyRevenue = await Order.findAll({
                 attributes: [
@@ -201,43 +162,42 @@ const getHomePage = async (req, res) => {
                 raw: true
             });
 
+            // SỬA LỖI CASE SENSITIVE VÀ GROUP BY
             const monthlySales = await OrderDetail.findAll({
                 attributes: [
-                    [fn('MONTH', col('order.created_at')), 'month'],
+                    [fn('MONTH', col('Order.created_at')), 'month'], // <--- Sửa 'order' thành 'Order'
                     [fn('SUM', col('quantity')), 'quantity']
                 ],
                 include: [{
                     model: Order,
+                    attributes: [], // <--- Thêm attributes rỗng
                     where: {
                         status_payment: 'paid',
                         status: { [Op.not]: 'cancelled' },
                         ...timeCondition
                     }
                 }],
-                group: [fn('MONTH', col('order.created_at'))],
-                order: [[fn('MONTH', col('order.created_at')), 'ASC']],
+                group: [fn('MONTH', col('Order.created_at'))], // <--- Sửa 'order' thành 'Order'
+                order: [[fn('MONTH', col('Order.created_at')), 'ASC']],
                 raw: true
             });
 
             const startMonth = (selectedQuarter - 1) * 3 + 1;
             labels = [startMonth, startMonth + 1, startMonth + 2].map(m => `Th${m}`);
             revenueData = Array(3).fill(0);
-            weekLabels = [startMonth, startMonth + 1, startMonth + 2].map(m => `Th${m}`);
             salesData = Array(3).fill(0);
+            weekLabels = labels;
 
             monthlyRevenue.forEach(item => {
                 const index = item.month - startMonth;
-                if (index >= 0 && index < 3) {
-                    revenueData[index] = parseFloat(item.revenue);
-                }
+                if (index >= 0 && index < 3) revenueData[index] = parseFloat(item.revenue);
             });
 
             monthlySales.forEach(item => {
                 const index = item.month - startMonth;
-                if (index >= 0 && index < 3) {
-                    salesData[index] = parseInt(item.quantity);
-                }
+                if (index >= 0 && index < 3) salesData[index] = parseInt(item.quantity);
             });
+
         } else {
             const dailyRevenue = await Order.findAll({
                 attributes: [
@@ -254,21 +214,23 @@ const getHomePage = async (req, res) => {
                 raw: true
             });
 
+            // SỬA LỖI CASE SENSITIVE VÀ GROUP BY
             const dailySales = await OrderDetail.findAll({
                 attributes: [
-                    [fn('DATE', col('order.created_at')), 'date'],
+                    [fn('DATE', col('Order.created_at')), 'date'], // <--- Sửa 'order' thành 'Order'
                     [fn('SUM', col('quantity')), 'quantity']
                 ],
                 include: [{
                     model: Order,
+                    attributes: [], // <--- Thêm attributes rỗng
                     where: {
                         status_payment: 'paid',
                         status: { [Op.not]: 'cancelled' },
                         ...timeCondition
                     }
                 }],
-                group: [fn('DATE', col('order.created_at'))],
-                order: [[fn('DATE', col('order.created_at')), 'ASC']],
+                group: [fn('DATE', col('Order.created_at'))], // <--- Sửa 'order' thành 'Order'
+                order: [[fn('DATE', col('Order.created_at')), 'ASC']],
                 raw: true
             });
 
@@ -283,23 +245,17 @@ const getHomePage = async (req, res) => {
             });
         }
 
-        // 9. Lấy top 5 sản phẩm mới được thêm vào (dựa trên product_id)
+        // 9. Lấy top 5 sản phẩm mới
         const topProducts = await Product.findAll({
-            attributes: [
-                'name',
-                'product_id'
-            ],
+            attributes: ['name', 'product_id'],
             order: [['product_id', 'DESC']],
             limit: 5,
             raw: true
         });
 
-        // 10. Lấy top 5 sản phẩm được xem nhiều nhất
+        // 10. Lấy top 5 sản phẩm xem nhiều
         const topViewedProducts = await Product.findAll({
-            attributes: [
-                'name',
-                'views'
-            ],
+            attributes: ['name', 'views'],
             order: [['views', 'DESC']],
             limit: 5,
             raw: true

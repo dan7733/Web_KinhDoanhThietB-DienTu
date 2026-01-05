@@ -1,5 +1,5 @@
 import express from "express";
-import voucherModel from '../models/voucherModel';
+import voucherModel from '../models/voucherModel.js';
 
 // Tải trang thêm voucher
 const createVoucher = async (req, res) => {

@@ -1,6 +1,6 @@
-import { sequelize, DataTypes } from '../configs/connectDatabase';
+import { sequelize, DataTypes } from '../configs/connectDatabase.js';
 import { Op } from 'sequelize';
-import { Product } from './productModel'; // Nếu productModel xuất dạng object { Product }
+import { Product } from './productModel.js'; // Nếu productModel xuất dạng object { Product }
 
 
 const Stock = sequelize.define('Stock', {

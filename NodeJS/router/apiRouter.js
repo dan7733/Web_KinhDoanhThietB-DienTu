@@ -1,15 +1,15 @@
 import express from 'express';
-import ProductController from '../controller/ProductController';
-import CategoryController from '../controller/CategoryController';
-import BrandController from '../controller/BrandController';
-import userMiddlewareController from '../controller/userMiddlewareController';
-import orderController from '../controller/OrderController';
-import VoucherController from '../controller/VoucherController';
-import StoreController from '../controller/StoreController';
-import NewsController from '../controller/NewsController';
-import upload from '../configs/upload';
-import ReviewController from '../controller/ReviewController';
-import { getCollaborativeRecommendationsController, getProductBasedRecommendationsController, getPopularityBasedRecommendationsController } from '../controller/RecommendController';
+import ProductController from '../controller/ProductController.js';
+import CategoryController from '../controller/CategoryController.js';
+import BrandController from '../controller/BrandController.js';
+import userMiddlewareController from '../controller/userMiddlewareController.js';
+import orderController from '../controller/OrderController.js';
+import VoucherController from '../controller/VoucherController.js';
+import StoreController from '../controller/StoreController.js';
+import NewsController from '../controller/NewsController.js';
+import upload from '../configs/upload.js';
+import ReviewController from '../controller/ReviewController.js';
+import { getCollaborativeRecommendationsController, getProductBasedRecommendationsController, getPopularityBasedRecommendationsController } from '../controller/RecommendController.js';
 const router = express.Router();
 
 const initAPIRoute = (app) => {

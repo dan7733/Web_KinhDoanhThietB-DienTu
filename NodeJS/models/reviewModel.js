@@ -1,4 +1,4 @@
-import { sequelize, DataTypes } from '../configs/connectDatabase';
+import { sequelize, DataTypes } from '../configs/connectDatabase.js';
 import { Op } from 'sequelize';
 import { User } from './userModel.js';
 import { Product } from './productModel.js';

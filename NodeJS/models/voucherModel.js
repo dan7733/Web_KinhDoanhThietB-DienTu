@@ -1,4 +1,4 @@
-import { sequelize, DataTypes } from '../configs/connectDatabase';
+import { sequelize, DataTypes } from '../configs/connectDatabase.js';
 import { Op } from 'sequelize';
 // Định nghĩa mô hình Voucher
 const Voucher = sequelize.define('Voucher', {

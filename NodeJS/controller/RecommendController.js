@@ -1,5 +1,5 @@
 import { Order } from '../models/orderModel.js';
-import { OrderDetail } from '../models/orderDetailModel.js';
+import { OrderDetail } from '../models/orderdetailModel.js';
 import { Product } from '../models/productModel.js';
 import { Category } from '../models/categoryModel.js';
 import { Brand } from '../models/brandModel.js';

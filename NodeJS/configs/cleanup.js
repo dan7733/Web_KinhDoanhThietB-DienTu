@@ -1,4 +1,4 @@
-import { PendingUsers } from '../models/PendingUserModel';
+import { PendingUsers } from '../models/PendingUserModel.js';
 import cron from 'node-cron';
 import { Op } from 'sequelize';
 

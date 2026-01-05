@@ -1,12 +1,12 @@
 import express from "express";
 import fs from 'fs';
 import path from 'path';
-import categoryModel from '../models/categoryModel';
-import brandModel from '../models/brandModel';
-import productModel from '../models/productModel';
-import stockModel from "../models/stockModel";
-import productdetailsModel from "../models/productdetailsModel";
-import stock from "../models/stockModel"
+import categoryModel from '../models/categoryModel.js';
+import brandModel from '../models/brandModel.js';
+import productModel from '../models/productModel.js';
+import stockModel from "../models/stockModel.js";
+import productdetailsModel from "../models/productdetailsModel.js";
+import stock from "../models/stockModel.js"
 // Hàm xóa ảnh nếu cần
 const deleteProductImage = (filename) => {
   if (!filename) return;

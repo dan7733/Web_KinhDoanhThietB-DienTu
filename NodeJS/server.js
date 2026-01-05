@@ -1,69 +1,78 @@
-import express from 'express'
-import dotenv from 'dotenv/config'
-import viewEngine from './configs/viewEngine';  
-import initWebRouter from './router/WebRouter';
-import initAPIRoute from './router/apiRouter';
-import path from 'path'
-import RedisStore from "connect-redis";
-import session from "express-session";
-import { createClient } from "redis";
+import express from 'express';
+import 'dotenv/config';
+import viewEngine from './configs/viewEngine.js';
+import initWebRouter from './router/WebRouter.js';
+import initAPIRoute from './router/apiRouter.js';
+import path from 'path';
+import RedisStore from 'connect-redis';
+import session from 'express-session';
+import { createClient } from 'redis';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import './configs/cleanup'; // Thêm cron job
+import './configs/cleanup.js';
 
-const app = express()
-const port=process.env.PORT
+const app = express();
+const port = process.env.PORT || 3000;
+
+/* ===================== MIDDLEWARE ===================== */
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use('/static', express.static(path.join(process.cwd(), 'public')));
+app.use('/images', express.static(path.join(process.cwd(), 'images')));
+
 viewEngine(app);
-app.use('/static', express.static(path.join(__dirname, 'public')))
-app.use('/images', express.static(path.join(__dirname, 'images')))
-// css
-// app.use(express.static(__dirname + '/views'));
 
-// Khởi tạo Redis client
-let redisClient = createClient();
-redisClient.connect().catch(console.error); // Bắt lỗi nếu kết nối thất bại
-
-// Khởi tạo Redis Store
-let redisStore = new RedisStore({
-  client: redisClient,
-  prefix: "myapp:",
+/* ===================== REDIS ===================== */
+const redisClient = createClient({
+  socket: {
+    host: process.env.REDIS_HOST || 'redis',
+    port: process.env.REDIS_PORT || 6379,
+  },
 });
 
-// Thiết lập session middleware với Redis Store
+redisClient.on('error', (err) => {
+  console.error('❌ Redis Error:', err);
+});
+
+await redisClient.connect();
+console.log('Redis connected');
+
+/* ===================== SESSION ===================== */
+const redisStore = new RedisStore({
+  client: redisClient,
+  prefix: 'myapp:',
+});
+
 app.use(
   session({
     store: redisStore,
-    resave: false, // Không lưu session nếu không có thay đổi
-    saveUninitialized: false, // Chỉ lưu session nếu có dữ liệu
-    secret: process.env.Ad_Session_Secret, // Khóa bí mật để mã hóa session
+    secret: process.env.Ad_Session_Secret,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60, // 1 giờ
+    },
   })
 );
 
-
-// cho phéo gọi api ở server
-const corsOptions = {
-  origin: ['http://localhost:3001', 'http://localhost:1234'],
-  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-  credentials: true
-};
-
-
-app.use(cors(corsOptions));
+/* ===================== CORS ===================== */
+app.use(
+  cors({
+    origin: ['http://localhost:3001', 'http://localhost:1234'],
+    credentials: true,
+  })
+);
 
 app.use(cookieParser());
 
-initAPIRoute(app)
-initWebRouter(app)
+/* ===================== ROUTER ===================== */
+initAPIRoute(app);
+initWebRouter(app);
 
+/* ===================== START ===================== */
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
-})
-
-
-
-
-
-
-
+  console.log(`🚀 Example app listening on port ${port}`);
+});

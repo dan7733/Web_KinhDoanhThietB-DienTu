@@ -1,10 +1,10 @@
 import express from 'express';
 import bcrypt from 'bcryptjs';
-import { sequelize, DataTypes } from '../configs/connectDatabase';
+import { sequelize, DataTypes } from '../configs/connectDatabase.js';
 import { Op } from 'sequelize';
-import { PendingUsers } from './PendingUserModel';
+import { PendingUsers } from './PendingUserModel.js';
 import { v4 as uuidv4 } from 'uuid';
-import { sendVerificationEmail, sendPasswordResetEmail } from '../configs/email';
+import { sendVerificationEmail, sendPasswordResetEmail } from '../configs/email.js';
 
 const User = sequelize.define('User', {
     user_id: {

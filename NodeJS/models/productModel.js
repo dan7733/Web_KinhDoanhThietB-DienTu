@@ -1,7 +1,7 @@
-import { sequelize, DataTypes } from '../configs/connectDatabase';
+import { sequelize, DataTypes } from '../configs/connectDatabase.js';
 import { Op } from 'sequelize';
-import { Brand } from './brandModel';
-import { Category } from './categoryModel';
+import { Brand } from './brandModel.js';
+import { Category } from './categoryModel.js';
 
 const Product = sequelize.define('Product', {
     product_id: {

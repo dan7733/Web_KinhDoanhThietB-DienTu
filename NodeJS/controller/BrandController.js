@@ -1,7 +1,7 @@
 import express from "express";
 import fs from 'fs';
 import path from 'path';
-import brandModel from '../models/brandModel';  // Import model xử lý với CSDL
+import brandModel from '../models/brandModel.js';  // Import model xử lý với CSDL
 import { UnknownConstraintError } from "sequelize";
 
 

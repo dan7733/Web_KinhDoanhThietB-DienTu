@@ -1,5 +1,5 @@
 import express from 'express'
-import { sequelize, DataTypes } from '../configs/connectDatabase';
+import { sequelize, DataTypes } from '../configs/connectDatabase.js';
 import { Op } from 'sequelize';
 
 // Định nghĩa mô hình `Nhom`
